@@ -5,6 +5,13 @@ class AIPlayer:
         self.player_number = player_number
         self.type = 'ai'
         self.player_string = 'Player {}:ai'.format(player_number)
+        self.depth = 4;
+        self.evaluationValue = [[3, 4, 5, 7, 5, 4, 3],    
+                                [4, 6, 8, 10, 8, 6, 4], 
+                                [5, 8, 11, 13, 11, 8, 5], 
+                                [5, 8, 11, 13, 11, 8, 5],
+                                [4, 6, 8, 10, 8, 6, 4],   
+                                [3, 4, 5, 7, 5, 4, 3]]
 
     def get_alpha_beta_move(self, board):
         """
@@ -26,7 +33,18 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        raise NotImplementedError('Whoops I don\'t know what to do')
+        
+        #raise NotImplementedError('Whoops I don\'t know what to do')
+
+    def alpha_beta_decision(self, board, depth):
+
+        succ = self.get_succ(board)
+        if depth == 0 or not succ: # Evaluate the non-terminal nodes
+            return self.evaluation_function(board)
+
+    def get_succ(self, board):
+
+
 
     def get_expectimax_move(self, board):
         """
@@ -72,11 +90,18 @@ class AIPlayer:
         RETURNS:
         The utility value for the current board
         """
-       
-       
-        return 0
+        # Initial each state; the range of untility is between -138 to 138 
+        int util = 0;
 
+        for row in range(board.shape[0]):
+            for col in range(board.shape[1]):
+                if board[row][col] == self.player_number:
+                    util += self.evaluationValue[row][col]
+                elif board[row][col] != 0:
+                    util -= self.evaluationValue[row][col]
+        return util 
 
+#It seems that random and human didn't consider the corner case, like no place to put
 class RandomPlayer:
     def __init__(self, player_number):
         self.player_number = player_number

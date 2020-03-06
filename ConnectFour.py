@@ -47,9 +47,10 @@ class Game:
             current_player = self.players[self.current_turn]
 
             if current_player.type == 'ai':
-                
+                #if opponent is random, using expectimax_move to get next column move
                 if self.players[int(not self.current_turn)].type == 'random':
                     p_func = current_player.get_expectimax_move
+                #else, using alpha_beta_move to get next column move
                 else:
                     p_func = current_player.get_alpha_beta_move
                 
@@ -57,6 +58,7 @@ class Game:
                     recv_end, send_end = mp.Pipe(False)
                     p = mp.Process(target=turn_worker, args=(self.board, send_end, p_func))
                     p.start()
+                    # if the player is over time limit then game over
                     if p.join(self.ai_turn_limit) is None and p.is_alive():
                         p.terminate()
                         raise Exception('Player Exceeded time limit')
