@@ -5,7 +5,7 @@ class AIPlayer:
         self.player_number = player_number
         self.type = 'ai'
         self.player_string = 'Player {}:ai'.format(player_number)
-        self.max_depth = 5;
+        self.max_depth = 4;
         self.evaluationValue = [[3, 4, 5, 7, 5, 4, 3],    
                                 [4, 6, 8, 10, 8, 6, 4], 
                                 [5, 8, 11, 13, 11, 8, 5], 
@@ -33,25 +33,42 @@ class AIPlayer:
         RETURNS:
         The 0 based index of the column that represents the next move
         """
-        move = self.alpha_beta_search(board, self.max_depth, True, -138, 138, 0)[1]
+        move = self.alpha_beta_search(board, self.max_depth, True, -138, 138, -10000)[1]
         #print (move)
         return move
         #raise NotImplementedError('Whoops I don\'t know what to do')
 
     def alpha_beta_search(self, board, depth, ismax, alpha, beta, col):
 
-        succ = self.get_succ(board)
+        succ = self.get_succ(board, ismax)
+        
         if depth == 0 or not succ: # Evaluate the non-terminal nodes
             #print("column")
             #print(col)
-            return self.evaluation_function(board), col
+            print("---")
+            print("depth: ", depth)
+            print("---")
+            evaluation = self.evaluation_function(board)
+            #print(evaluation)
+            return evaluation, col
 
-        move = col
-
+        #check if it is the initailization case
+        if col == -10000:
+            move = succ[0][1]
+        else:
+            move = col
         if ismax:
+
             val = -138
             for new_board, column  in succ:
+                # check if connect 4, if so just prune
+                check = self.connect_four(new_board)
+                if check == 1000:
+                    return 1000, column
                 temp = self.alpha_beta_search(new_board, depth - 1, False, alpha, beta, column)
+                #if the opponent will win 
+                #if (temp == -1000):
+
                 if temp[0] > val:
                     val = temp[0]
                     move = column
@@ -62,8 +79,16 @@ class AIPlayer:
             return val, move 
         #ismin
         else:
+
             val = 138
             for new_board, column  in succ:
+                # check if connect 4
+                check = self.connect_four(new_board)
+                if check == -1000:
+                    #print(col)
+                    #print(-1000)
+                    #print(column)
+                    return -1000, column
                 temp = self.alpha_beta_search(new_board, depth - 1, True, alpha, beta, column)
                 if temp[0] < val:
                     val = temp[0]
@@ -79,7 +104,7 @@ class AIPlayer:
     """
     Given the current state of the board, return all the achievable states after next move
     """
-    def get_succ(self, board):
+    def get_succ(self, board, ismax):
 
         valid_cols = self.get_valid_cols(board)
         if not valid_cols:
@@ -89,14 +114,14 @@ class AIPlayer:
         for col in valid_cols:
             new_board = board.copy()
             #update the new board
-            self.update_board(new_board, col)
+            self.update_board(new_board, col, ismax)
             succ.append((new_board, col))
 
         return succ
 
 
     #Credit: from ConnectFour.py which is provided by the class assignment2
-    def update_board(self, board, move):
+    def update_board(self, board, move, ismax):
         
         update_row = -1
         for row in range(1, board.shape[0]):
@@ -105,9 +130,15 @@ class AIPlayer:
                 update_row = row-1
             elif row== board.shape[0]-1 and board[row, move] == 0:
                 update_row = row
-
+            
             if update_row >= 0:
-                board[update_row, move] = self.player_number
+                if (ismax):
+                    board[update_row, move] = self.player_number
+                else:
+                    if self.player_number == 1:
+                        board[update_row, move] = 2
+                    else:
+                        board[update_row, move] = 1
                 break
        
 
@@ -153,16 +184,18 @@ class AIPlayer:
 
     def expectimax_search(self, board, depth, ismax, col):
 
-        succ = self.get_succ(board)
+        succ = self.get_succ(board, ismax)
         if depth == 0 or not succ: # Evaluate the non-terminal nodes
             #print("column")
             #print(col)
             return self.evaluation_function(board), col
 
+        
         if ismax:
             move = col
-            val = -138
+            val = -10000
             for new_board, column  in succ:
+                # check if connect 4, if so just prune
                 temp = self.expectimax_search(new_board, depth - 1, False, column)
                 if temp[0] > val:
                     val = temp[0]
@@ -173,6 +206,10 @@ class AIPlayer:
         else:
             val = 0
             for new_board, column  in succ:
+                check = self.connect_four(new_board)
+                if check == -1000:
+                    
+                    return -1000, column
                 temp = self.expectimax_search(new_board, depth - 1, True, column)
                 p = 1/len(succ)
                 val += temp[0] * p 
@@ -202,6 +239,11 @@ class AIPlayer:
         # Initial each state; the range of untility is between -138 to 138 
         util = 0;
 
+        #block opponent/connect 4 for current player
+        check = self.connect_four(board)
+        if check != 0:
+            return check
+
         for row in range(board.shape[0]):
             for col in range(board.shape[1]):
                 if board[row][col] == self.player_number:
@@ -210,6 +252,99 @@ class AIPlayer:
                     util -= self.evaluationValue[row][col]
         #print(util)
         return util 
+
+    #check if the state has a connect four 
+    # return: 276 if current player has connect4, 
+    #         0 if no connect4,
+    #         -276 if opponent has connect4
+    def connect_four(self, board):
+        connect_four = False
+        for i in range(board.shape[0]):
+            #print("i: ")
+            #print(i)
+            if i < board.shape[0] - 3:
+                for j in range(board.shape[1]):
+                    check = self.connect_four_for_position(board, i, j)
+                    if check != 0:
+                        return check
+            else:
+                for j in range(board.shape[1] - 3):
+                    check = self.connect_four_for_position(board, i, j)
+                    if check != 0:
+                        return check
+        return 0
+
+    def connect_four_for_position(self, board, row, col):
+        connect_four = False
+        #check if connect 4 from current position down
+        if row < board.shape[0] - 3:
+            #check for current player
+            curr_player = True
+            #check for opponent
+            opponent = True
+            for r in range(4):
+                if (board[row + r][col] != self.player_number):
+                    curr_player = False
+                if (board[row + r][col] == self.player_number or board[row + r][col] == 0):
+                    opponent = False
+            
+            if (curr_player):
+                return 1000
+            if (opponent):
+                return -1000
+
+            #check diagonal if connect 4 from current position down and to right 
+            if col < board.shape[1] - 3:
+                #check for current player
+                curr_player = True
+                #check for opponent
+                opponent = True
+                for r in range(4):
+                    if (board[row + r][col + r] != self.player_number):
+                        curr_player = False
+                    if (board[row + r][col + r] == self.player_number or board[row + r][col + r] == 0):
+                        opponent = False
+                
+                if (curr_player):
+                    return 1000
+                if (opponent):
+                    return -1000
+
+        #check if connect 4 from current position to right 
+        if col < board.shape[1] - 3:
+            #check for current player
+            curr_player = True
+            #check for opponent
+            opponent = True
+            for r in range(4):
+                if (board[row][col + r] != self.player_number):
+                    curr_player = False
+                if (board[row][col + r] == self.player_number or board[row][col + r] == 0):
+                    opponent = False
+            if (curr_player):
+                return 1000
+            if (opponent):
+                return -1000
+            #check diagonal if connect 4 from current position up and to right 
+            if row > 2:
+                #check for current player
+                curr_player = True
+                #check for opponent
+                opponent = True
+                for r in range(4):
+                    if (board[row - r][col + r] != self.player_number):
+                        curr_player = False
+                    if (board[row - r][col + r] == self.player_number or board[row - r][col + r] == 0):
+                        opponent = False
+                if (curr_player):
+                    return 1000
+                if (opponent):
+                    return -1000
+
+        return 0
+
+
+
 
 #It seems that random and human didn't consider the corner case, like no place to put
 class RandomPlayer:
