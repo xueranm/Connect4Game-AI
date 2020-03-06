@@ -50,6 +50,7 @@ class Game:
                 #if opponent is random, using expectimax_move to get next column move
                 if self.players[int(not self.current_turn)].type == 'random':
                     p_func = current_player.get_expectimax_move
+                    #p_func = current_player.get_alpha_beta_move
                 #else, using alpha_beta_move to get next column move
                 else:
                     p_func = current_player.get_alpha_beta_move
@@ -67,8 +68,9 @@ class Game:
                     print(uh_oh.format(current_player.player_number))
                     print(e)
                     raise Exception('Game Over')
-
+              
                 move = recv_end.recv()
+                #print (move)
             else:
                 move = current_player.get_move(self.board)
 
