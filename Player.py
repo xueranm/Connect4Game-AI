@@ -45,9 +45,9 @@ class AIPlayer:
         if depth == 0 or not succ: # Evaluate the non-terminal nodes
             #print("column")
             #print(col)
-            print("---")
-            print("depth: ", depth)
-            print("---")
+            #print("---")
+            #print("One depth: ", depth)
+            #print("---")
             evaluation = self.evaluation_function(board)
             #print(evaluation)
             return evaluation, col
