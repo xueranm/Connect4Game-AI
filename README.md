@@ -5,9 +5,14 @@
  Implement an agent to play the game of Connect 4. 
  Use alpha-beta search algorithm and expectimax search algorithm to select the next move given the current board state, and use depth-limit to reduce the time complexity.
  
- Usage: python ConnectFour.py [player1] [player2]
+ Usage: 
+ 
+ 	python ConnectFour.py [player1] [player2]
+ 
+ 
         python ConnectFour.py --time [number] [player1] [player2]
- player1 and player2 choose from: ai/human/random
+        
+	player1 and player2 choose from: ai/human/random
  
 
 
@@ -15,7 +20,7 @@
 ## Table of Contents
 
 - [Install and Usage](#install-and-usage)
-- [Algorithm and Performance](#algorithm_and_performance)
+- [Algorithm and Performance](#algorithm-and-performance)
 - [Heuristic and Evaluation Function](#heuristic-and-evaluation-function)
 - [Implementations](#implementations)
 - [Contributing](#contributing)
