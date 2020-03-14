@@ -9,8 +9,7 @@
  
  	python ConnectFour.py [player1] [player2]
  
- 
-        python ConnectFour.py --time [number] [player1] [player2]
+	python ConnectFour.py --time [number] [player1] [player2]
         
 	player1 and player2 choose from: ai/human/random
  
@@ -29,6 +28,7 @@
 ## Install and Usage
 
 The development environment of the project is as following: 
+
 numpy==1.18.1
 python 3.7
 
@@ -51,10 +51,11 @@ Use alpha-beta search algorithm and expectimax search algorithm to select the ne
 
 Here is a table for different max_depth and time limit.
 
-sec\depth    	5		4		3		
-3		Exceed		Exceed		Not exceed
-5		Exceed		Not exceed	Not exceed
-10		Exceed		Not exceed	Not exceed
+
+	sec\depth    	5		4		3		
+	3		Exceed		Exceed		Not exceed
+	5		Exceed		Not exceed	Not exceed
+	10		Exceed		Not exceed	Not exceed
 
 
 
